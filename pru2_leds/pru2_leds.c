@@ -42,7 +42,11 @@ volatile unsigned int *pru2_dram = (unsigned int *) (PRU2_DRAM + 0x200);
 
 #define START_COMMAND   0x1AD37ACD
 #define ACKNOWLEDGE   	0x0ABEF6FF
-
+#define Left_msg		0x00000001
+#define Right_msg		0x00000002
+#define Stop_msg		0x00000003
+#define Back_msg		0x00000004
+#define delay_time			22400000 // 0.5 s
 
 volatile register uint32_t __R30; //output register
 volatile register uint32_t __R31; //input register
@@ -57,15 +61,61 @@ void delay(unsigned int time){
 
 void main(void)
 {
-
+		uint32_t msg=ACKNOWLEDGE;
         /* Clear SYSCFG[STANDBY_INIT] to enable OCP master port */
         CT_CFG.SYSCFG_bit.STANDBY_INIT = 0;
-        __R30 &= ~both_on;
 
-        while(pru0_dram[0]!=START_COMMAND);
-        pru0_dram[1]=msg;
+        __R30 &=~(P8_03|P8_04|P8_05);
+
+        while(pru2_dram[0]!=START_COMMAND);
+        pru2_dram[1]=msg;
+
+        __R30 |= P8_23;
 
     while(1) {
+
+    	switch(pru2_dram[2]){
+    	 case Left_msg:
+    		 __R30 &= ~(P9_13);
+    		 __R30 |= (P8_05);
+    		 delay(delay_time);
+    		 __R30 |= (P8_04);
+    		 delay(delay_time);
+    		 __R30 |= (P8_03);
+    		 delay(delay_time);
+    		 __R30 &=~(P8_03|P8_04|P8_05);
+    		 delay(delay_time+delay_time);
+    		 break;
+    	 case Right_msg:
+    		 __R30 &= ~(P9_13);
+    		 __R30 |= (P8_20);
+    		 delay(delay_time);
+    		 __R30 |= (P8_21);
+    		 delay(delay_time);
+    		 __R30 |= (P8_22);
+    		 delay(delay_time);
+    		 __R30 &=~(P8_20|P8_21|P8_22);
+    		 delay(delay_time+delay_time);
+    		 break;
+    	 case Stop_msg:
+    		 __R30 |= (P9_13);
+    		 delay(4*delay_time);
+    		 break;
+    	 case Back_msg:
+    	     __R30 |= (P9_13);
+    	     delay(4*delay_time);
+    	     __R30 &= ~(P9_13);
+			 delay(4*delay_time);
+			 break;
+    	 default:
+    		 __R30 &= ~(P9_13);
+    		 __R30 &=~(P8_03|P8_04|P8_05);
+    		 __R30 &=~(P8_20|P8_21|P8_22);
+    		 break;
+    	}
+    	pru2_dram[2]=0;
+
+    }
 
 
 }

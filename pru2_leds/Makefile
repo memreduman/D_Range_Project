@@ -67,11 +67,20 @@ install_PRU2:
 	@echo ''
 	@echo 'Stopping current PRU1 application ($(PRU2))'
 	@echo 'Installing firmware'
-	@sudo cp $(TARGET) /lib/firmware/am57xx-pru1_1-fw
+	@sudo cp $(TARGET) /lib/firmware/am57xx-pru2_0-fw
 	@echo 'Deploying firmware'
 	@echo am57xx-pru2_0-fw | sudo tee $(PRU2)/firmware
-	@echo 'Starting new PRU1 application'
+	@echo 'Starting new PRU2 application'
 	@echo start | sudo tee $(PRU2)/state
+install_PRU3:
+	@echo ''
+	@echo 'Stopping current PRU1 application ($(PRU3))'
+	@echo 'Installing firmware'
+	@sudo cp $(TARGET) /lib/firmware/am57xx-pru2_1-fw
+	@echo 'Deploying firmware'
+	@echo am57xx-pru2_1-fw | sudo tee $(PRU3)/firmware
+	@echo 'Starting new PRU3 application'
+	@echo start | sudo tee $(PRU3)/state
 	
 stop_PRU0:
 	@echo ''
@@ -83,8 +92,12 @@ stop_PRU1:
 	@echo stop | sudo tee $(PRU1)/state
 stop_PRU2:	
 	@echo ''
-	@echo 'Stopping current PRU1 application ($(PRU2))'
+	@echo 'Stopping current PRU2 application ($(PRU2))'
 	@echo stop | sudo tee $(PRU2)/state
+stop_PRU3:	
+	@echo ''
+	@echo 'Stopping current PRU3 application ($(PRU3))'
+	@echo stop | sudo tee $(PRU3)/state
 		
 restart_PRU0:
 	@echo ''
@@ -106,6 +119,26 @@ restart_PRU1:
 	@echo am57xx-pru1_1-fw | sudo tee $(PRU1)/firmware
 	@echo 'Starting new PRU1 application'
 	@echo start | sudo tee $(PRU1)/state
+restart_PRU2:
+	@echo ''
+	@echo 'Stopping current PRU2 application ($(PRU2))'
+	@echo stop | sudo tee $(PRU2)/state
+	@echo 'Installing firmware'
+	@sudo cp $(TARGET) /lib/firmware/am57xx-pru2_0-fw
+	@echo 'Deploying firmware'
+	@echo am57xx-pru2_0-fw| sudo tee $(PRU2)/firmware
+	@echo 'Starting new PRU2 application'
+	@echo start | sudo tee $(PRU2)/state
+restart_PRU3:
+	@echo ''
+	@echo 'Stopping current PRU3 application ($(PRU3))'
+	@echo stop | sudo tee $(PRU3)/state
+	@echo 'Installing firmware'
+	@sudo cp $(TARGET) /lib/firmware/am57xx-pru2_1-fw
+	@echo 'Deploying firmware'
+	@echo am57xx-pru2_1-fw| sudo tee $(PRU3)/firmware
+	@echo 'Starting new PRU3 application'
+	@echo start | sudo tee $(PRU3)/state
 # Invokes the linker (-z flag) to make the .out file
 $(TARGET): $(OBJECTS) $(LINKER_COMMAND_FILE)
 	@echo ''
